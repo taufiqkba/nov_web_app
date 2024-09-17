@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func handlerIndex(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +33,8 @@ func main() {
 	fmt.Printf("serve started at %s\n", address)
 
 	server := new(http.Server)
+	server.ReadTimeout = time.Second * 10
+	server.WriteTimeout = time.Second * 10
 	server.Addr = address
 	err := server.ListenAndServe()
 	if err != nil {
