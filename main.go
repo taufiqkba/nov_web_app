@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"time"
+	"path"
+	"text/template"
 )
 
 func handlerIndex(w http.ResponseWriter, r *http.Request) {
@@ -16,28 +17,37 @@ func handlerHello(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(message))
 }
 
+// rendering html web page
+func handlerIndexHTML(w http.ResponseWriter, r *http.Request) {
+	var filepath = path.Join("views", "index.html")
+	var tmpl, err = template.ParseFiles(filepath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var data = map[string]interface{}{
+		"title": "Learning Golang Web",
+		"name":  "Spiderman Betmen Cemen",
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func main() {
-	http.HandleFunc("/", handlerIndex)
+	http.HandleFunc("/another", handlerIndex)
 	http.HandleFunc("/index", handlerIndex)
 	http.HandleFunc("/hello", handlerHello)
+	http.HandleFunc("/", handlerIndexHTML)
 
-	// address := "localhost:9000"
-	// fmt.Printf("serve started at %s\n", address)
-	// err := http.ListenAndServe(address, nil)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
+	http.Handle("/static/",
+		http.StripPrefix("/static/",
+			http.FileServer(http.Dir("assets"))))
 
-	// web server using http.Server
-	address := ":9000"
-	fmt.Printf("serve started at %s\n", address)
-
-	server := new(http.Server)
-	server.ReadTimeout = time.Second * 10
-	server.WriteTimeout = time.Second * 10
-	server.Addr = address
-	err := server.ListenAndServe()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	// web server running
+	fmt.Println("server started at localhost:9000")
+	http.ListenAndServe(":9000", nil)
 }
