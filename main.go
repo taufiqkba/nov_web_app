@@ -7,6 +7,8 @@ import (
 	"text/template"
 )
 
+type M map[string]interface{}
+
 func handlerIndex(w http.ResponseWriter, r *http.Request) {
 	message := "Welcome"
 	w.Write([]byte(message))
@@ -46,6 +48,14 @@ func main() {
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("assets"))))
+
+	// render partial HTML file
+
+	tmpl, err := template.ParseGlob("views/*")
+	if err != nil {
+		panic(err.Error())
+		return
+	}
 
 	// web server running
 	fmt.Println("server started at localhost:9000")
